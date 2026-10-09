@@ -12,6 +12,7 @@
 #include "InventoryComponent.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "ItemDatabaseAsset.h"
+#include "TextDatabaseAsset.h" 
 
 
 UCrimeGameInstanceSubsystem* UCrimeGameInstanceSubsystem::Get(const UObject* WorldContextObject)
@@ -214,8 +215,79 @@ FName UCrimeGameInstanceSubsystem::SelectItemId(FName ItemId) const
 	return ItemId;
 }
 
-void UCrimeGameInstanceSubsystem::ShowCenterMessage(const FString& Message)
+TArray<FString> UCrimeGameInstanceSubsystem::GetTextIdOptions()
 {
+	TArray<FString> Options;
+
+	FAssetRegistryModule& AssetRegistryModule =
+		FModuleManager::LoadModuleChecked<FAssetRegistryModule>(
+			TEXT("AssetRegistry")
+		);
+
+	TArray<FAssetData> DatabaseAssets;
+	AssetRegistryModule.Get().GetAssetsByClass(
+		UTextDatabaseAsset::StaticClass()->GetClassPathName(),
+		DatabaseAssets,
+		true
+	);
+
+	for (const FAssetData& AssetData : DatabaseAssets)
+	{
+		const UTextDatabaseAsset* DatabaseAsset =
+			Cast<UTextDatabaseAsset>(AssetData.GetAsset());
+
+		if (!IsValid(DatabaseAsset))
+		{
+			continue;
+		}
+
+		for (const FMessageTextEntry& Entry : DatabaseAsset->Texts)
+		{
+			if (!Entry.TextId.IsNone())
+			{
+				Options.AddUnique(Entry.TextId.ToString());
+			}
+		}
+	}
+
+	Options.Sort();
+	return Options;
+}
+
+FName UCrimeGameInstanceSubsystem::SelectTextId(FName TextId) const
+{
+	return TextId;
+}
+
+void UCrimeGameInstanceSubsystem::ShowCenterMessageText(
+	const FString& Message)
+{
+	if (Message.IsEmpty()) return;
+
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!GameInstance || !World) return;
+
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController)) return;
+
+
+	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
+
+	if (!IsValid(CrimeHUD)) return;
+
+	CrimeHUD->ShowCenterMessage(Message);
+}
+
+void UCrimeGameInstanceSubsystem::ShowCenterMessageTextId(FName TextId)
+{
+
+	if (TextId.IsNone()) return;
+
 	UGameInstance* GameInstance = GetGameInstance();
 	UWorld* World = GetWorld();
 
@@ -224,21 +296,51 @@ void UCrimeGameInstanceSubsystem::ShowCenterMessage(const FString& Message)
 		return;
 	}
 
+	const ACrimeGameModeBase* GameMode =
+		World->GetAuthGameMode<ACrimeGameModeBase>();
+
+	const UTextDatabaseAsset* DatabaseAsset =
+		IsValid(GameMode) ? GameMode->GetTextDatabaseAsset() : nullptr;
+
+	if (!IsValid(DatabaseAsset))
+	{
+		UE_LOG(
+			LogTemp,
+			Warning,
+			TEXT("ShowCenterMessage: TextDatabaseAsset is not assigned.")
+		);
+		return;
+	}
+
+	const FMessageTextEntry* Entry =
+		DatabaseAsset->Texts.FindByPredicate(
+			[TextId](const FMessageTextEntry& Candidate)
+			{
+				return Candidate.TextId == TextId;
+			}
+		);
+
+	if (!Entry)
+	{
+		UE_LOG(
+			LogTemp,
+			Warning,
+			TEXT("ShowCenterMessage: TextId '%s' was not found."),
+			*TextId.ToString()
+		);
+		return;
+	}
+
+
 	APlayerController* PlayerController =
 		GameInstance->GetFirstLocalPlayerController(World);
 
-	if (!PlayerController)
-	{
-		return;
-	}
+	if (!PlayerController) return;
 
 	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
-	if (!IsValid(CrimeHUD))
-	{
-		return;
-	}
+	if (!IsValid(CrimeHUD)) return;
 
-	CrimeHUD->ShowCenterMessage(Message);
+	CrimeHUD->ShowCenterMessage(Entry->Message.ToString());
 }
 
 void UCrimeGameInstanceSubsystem::OnFadeEffect()
@@ -266,6 +368,30 @@ void UCrimeGameInstanceSubsystem::OnFadeEffect()
 	}
 
 	CrimeHUD->OnFadeEffect();
+}
+
+void UCrimeGameInstanceSubsystem::PlayInventoryHintAnimation(
+	int32 InventoryIndex)
+{
+	if (InventoryIndex < 0) return;
+
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!IsValid(GameInstance) || !IsValid(World)) return;
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController)) return;
+
+	ACrimeHUD* CrimeHUD =
+		PlayerController->GetHUD<ACrimeHUD>();
+
+	if (!IsValid(CrimeHUD)) return;
+
+	// HUD 블루프린트 이벤트 실행.
+	CrimeHUD->PlayInventoryHintAnimation(InventoryIndex);
 }
 
 void UCrimeGameInstanceSubsystem::SetPlayerControlEnabled(bool bEnabled)

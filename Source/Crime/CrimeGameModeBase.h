@@ -7,6 +7,7 @@
 #include "CrimeGameModeBase.generated.h"
 
 class UItemDatabaseAsset;
+class UTextDatabaseAsset;
 
 /**
  * 
@@ -17,8 +18,11 @@ class CRIME_API ACrimeGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Data")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Data")
 	TObjectPtr<UItemDatabaseAsset> ItemDatabaseAsset = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Data")
+	TObjectPtr<UTextDatabaseAsset> TextDatabaseAsset = nullptr;
 
 public:
 	UItemDatabaseAsset* GetItemDatabaseAsset() const
@@ -26,4 +30,8 @@ public:
 		return ItemDatabaseAsset;
 	}
 	
+	UTextDatabaseAsset* GetTextDatabaseAsset() const
+	{
+		return TextDatabaseAsset;
+	}
 };

@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
+
+class UInteractionComponent;
+
 UCLASS(Abstract, Blueprintable)
 class CRIME_API AItem : public AActor
 {
@@ -24,5 +27,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	FName ItemId = NAME_None;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
+	TObjectPtr<UInteractionComponent> InteractionComponent;
+
+private:
+	UFUNCTION()
+	void HandleInteraction(AActor* InteractingActor);
 
 };

@@ -50,11 +50,31 @@ public:
 	UFUNCTION()
 	static TArray<FString> GetItemIdOptions();
 
+	UFUNCTION(BlueprintPure, Category = "Text Data",
+		meta = (DisplayName = "Select Text ID"))
+	FName SelectTextId(
+		UPARAM(meta = (GetOptions = "Crime.CrimeGameInstanceSubsystem.GetTextIdOptions"))
+		FName TextId
+	) const;
+
+	// TextDataAsset의 항목을 반환하기 위한 함수.
+	UFUNCTION()
+	static TArray<FString> GetTextIdOptions();
+
 	UFUNCTION(BlueprintCallable, Category = "HUD|Messages")
-	void ShowCenterMessage(const FString& Message);
+	void ShowCenterMessageText(const FString& Message);
+
+	UFUNCTION(BlueprintCallable, Category = "HUD|Messages")
+	void ShowCenterMessageTextId(
+		UPARAM(meta = (GetOptions = "Crime.CrimeGameInstanceSubsystem.GetTextIdOptions"))
+		FName TextId
+	);
 
 	UFUNCTION(BlueprintCallable, Category = "HUDFade")
 	void OnFadeEffect();
+
+	UFUNCTION(BlueprintCallable, Category = "HUD|Inventory")
+	void PlayInventoryHintAnimation(int32 InventoryIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	void SetPlayerControlEnabled(bool bEnabled);

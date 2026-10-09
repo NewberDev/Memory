@@ -36,24 +36,10 @@ void ACrimeHUD::CreateBaseWidget()
 		return;
 	}
 
-	BaseWidgetInstance->AddToViewport();
-	//HideBaseWidget();
+	BaseWidgetInstance->AddToViewport(100);
+	
+	OnBaseWidgetCreated(BaseWidgetInstance);
+
 	SetInteracterKeyVisible(false);
-}
-
-void ACrimeHUD::ShowBaseWidget()
-{
-	if (IsValid(BaseWidgetInstance))
-	{
-		BaseWidgetInstance->SetVisibility(ESlateVisibility::Visible);
-	}
-}
-
-void ACrimeHUD::HideBaseWidget()
-{
-	if (IsValid(BaseWidgetInstance))
-	{
-		BaseWidgetInstance->SetVisibility(ESlateVisibility::Collapsed);
-	}
 }
 

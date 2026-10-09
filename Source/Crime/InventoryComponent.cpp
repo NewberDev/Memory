@@ -2,7 +2,8 @@
 
 
 #include "InventoryComponent.h"
-//#include "GameFramework/Actor.h"
+
+#include "CrimeGameInstanceSubsystem.h"
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
@@ -42,11 +43,23 @@ bool UInventoryComponent::AddItem(const FInventoryItem& Item)
 		return false;
 	}
 
+	if (OwnedItems.Num() >= MaxItemCount)
+	{
+		UCrimeGameInstanceSubsystem* Subsystem =
+			UCrimeGameInstanceSubsystem::Get(this);
+
+		if (IsValid(Subsystem))
+		{
+			Subsystem->ShowCenterMessageTextId(InventoryFullTextId);
+		}
+
+		return false;
+	}
+
 	OwnedItems.Add(Item);
 
 	// UI : 획득 알림
 	OnInventoryItemAdded.Broadcast(Item);
-
 	// UI 인벤토리 알림.
 	OnInventoryChanged.Broadcast();
 

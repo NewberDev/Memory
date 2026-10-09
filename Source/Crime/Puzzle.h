@@ -7,6 +7,7 @@
 #include "Puzzle.generated.h"
 
 class UUserWidget;
+class UInteractionComponent;
 
 UCLASS(Abstract)
 class CRIME_API APuzzle : public AActor
@@ -29,6 +30,9 @@ protected:
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
+	TObjectPtr<UInteractionComponent> InteractionComponent;
+
 public:	
 
 	UFUNCTION(BlueprintCallable, Category = "Puzzle|UI")
@@ -49,4 +53,8 @@ public:
 
 	virtual void OnPuzzleSceneOpened_Implementation(UUserWidget* PuzzleWidget);
 
+
+private:
+	UFUNCTION()
+	void HandleInteraction(AActor* InteractingActor);
 };

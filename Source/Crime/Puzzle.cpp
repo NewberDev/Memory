@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
 #include "CrimeGameInstanceSubsystem.h"
+#include "InteractionComponent.h"
 
 // Sets default values
 APuzzle::APuzzle()
@@ -12,12 +13,25 @@ APuzzle::APuzzle()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
+	InteractionComponent =
+		CreateDefaultSubobject<UInteractionComponent>(
+			TEXT("InteractionComponent")
+		);
+
 }
 
 // Called when the game starts or when spawned
 void APuzzle::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (IsValid(InteractionComponent))
+	{
+		InteractionComponent->OnInteractionRequested.AddUniqueDynamic(
+			this,
+			&APuzzle::HandleInteraction
+		);
+	}
 	
 	if (!PuzzleWidgetClass)
 	{
@@ -98,3 +112,13 @@ void APuzzle::OnPuzzleSceneOpened_Implementation(UUserWidget* PuzzleWidget)
 	// 자식 퍼즐 블루프린트에서 이 이벤트를 오버라이드한다.
 }
 
+void APuzzle::HandleInteraction(AActor* InteractingActor)
+{
+	if (!IsValid(InteractingActor))
+	{
+		return;
+	}
+
+	// 기존 퍼즐 화면 열기 로직 실행.
+	OnPuzzleScene();
+}

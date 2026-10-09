@@ -20,10 +20,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void CreateBaseWidget();
 
-	UFUNCTION(BlueprintCallable, Category = "HUD")
+	UFUNCTION(BlueprintImplementableEvent, Category = "HUD")
+	void OnBaseWidgetCreated(UUserWidget* CreatedWidget);
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "HUD")
 	void ShowBaseWidget();
 
-	UFUNCTION(BlueprintCallable, Category = "HUD")
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "HUD")
 	void HideBaseWidget();
 
 	// 함수 이름만 선언합니다. HUD 블루프린트에서 구현합니다.
@@ -35,6 +38,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "HUD|Messages")
 	void OnFadeEffect();
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "HUD|Inventory")
+	void PlayInventoryHintAnimation(int32 InventoryIndex);
 
 protected:
 	virtual void BeginPlay() override;

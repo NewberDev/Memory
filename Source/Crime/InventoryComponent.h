@@ -65,6 +65,15 @@ public:
 	FOnInventoryItemRemoved OnInventoryItemRemoved;
 
 private:
+
+	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (ClampMin = "1"))
+	int32 MaxItemCount = 6;
+
+	// FullTextId로 직접 선택.
+	UPROPERTY(EditAnywhere, Category = "Inventory|Messages",
+		meta = (GetOptions = "Crime.CrimeGameInstanceSubsystem.GetTextIdOptions"))
+	FName InventoryFullTextId = NAME_None;
+
 	// 외부에서는 AddItem / RemoveItem으로만 변경한다.
 	UPROPERTY(Transient)
 	TArray<FInventoryItem> OwnedItems;
