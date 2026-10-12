@@ -31,8 +31,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
 	TObjectPtr<UInteractionComponent> InteractionComponent;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item|Pickup")
+	bool bDestroyAfterPickup = true;
+
+	// [추가] 인벤토리에 아이템이 정상 추가된 경우에만 실행.
+	UFUNCTION(BlueprintImplementableEvent, Category = "Item|Pickup")
+	void OnPickupSucceeded(AActor* InteractingActor);
+
 private:
 	UFUNCTION()
 	void HandleInteraction(AActor* InteractingActor);
+
+	bool bPickupCompleted = false;
 
 };
