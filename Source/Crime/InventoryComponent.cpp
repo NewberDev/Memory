@@ -111,3 +111,22 @@ TArray<FInventoryItem> UInventoryComponent::GetItems() const
 {
 	return OwnedItems;
 }
+
+bool UInventoryComponent::CheckPickupSpace()
+{
+	if (OwnedItems.Num() < MaxItemCount)
+	{
+		return true;
+	}
+
+	// 인벤토리가 꽉 찼으면 기존 메시지 표시
+	UCrimeGameInstanceSubsystem* Subsystem =
+		UCrimeGameInstanceSubsystem::Get(this);
+
+	if (IsValid(Subsystem))
+	{
+		Subsystem->ShowCenterMessageTextId(InventoryFullTextId);
+	}
+
+	return false;
+}

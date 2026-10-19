@@ -47,24 +47,16 @@ bool AItem::TryPickup(AActor* InteractingActor)
 		UCrimeGameInstanceSubsystem::Get(InteractingActor);
 
 	if (!IsValid(Subsystem) ||
-		!Subsystem->AddItemToPlayerInventory(ItemId))
+		!Subsystem->CheckPlayerInventorySpace())
 	{
 		return false;
 	}
 
 	bPickupCompleted = true;
 
-	SetActorEnableCollision(false);
-	SetActorHiddenInGame(true);
-
 	//아이템 획득 후에 실행하는 함수 - 아이템 별로 추가로직으로 작성한다.
 	//블루프린트에서 추가 구현이 없으면, 그냥 넘어간다.
 	OnPickupSucceeded(InteractingActor);
-
-	if (bDestroyAfterPickup && IsValid(this))
-	{
-		Destroy();
-	}
 
 	return true;
 }

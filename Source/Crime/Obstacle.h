@@ -35,6 +35,9 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Obstacle")
     FName RequiredItemId = NAME_None;
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Obstacle")
+    bool bShowFailureMessage = true;
+
     //장애물 제거를 실패할 경우 출력될 TextLog
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Obstacle",
         meta = (GetOptions = "Crime.CrimeGameInstanceSubsystem.GetTextIdOptions"))

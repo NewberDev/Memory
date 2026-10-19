@@ -67,7 +67,7 @@ void AObstacle::TryRemoveObstacle(AActor* InteractingActor)
     }
 
     // 실패 문구가 등록되어 있을 때만 표시한다.
-    if (!FailureTextId.IsNone())
+    if (bShowFailureMessage && !FailureTextId.IsNone())
     {
         UCrimeGameInstanceSubsystem* Subsystem =
             UCrimeGameInstanceSubsystem::Get(InteractingActor);

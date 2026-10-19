@@ -13,6 +13,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "ItemDatabaseAsset.h"
 #include "TextDatabaseAsset.h" 
+#include "CrimeCharacter.h"
 
 
 UCrimeGameInstanceSubsystem* UCrimeGameInstanceSubsystem::Get(const UObject* WorldContextObject)
@@ -60,6 +61,14 @@ UInventoryComponent* UCrimeGameInstanceSubsystem::GetPlayerInventory() const
 
 void UCrimeGameInstanceSubsystem::SetInteracterKeyVisible(bool bVisible)
 {
+
+	bInteracterKeyRequestedVisible = bVisible;
+
+	RefreshInteracterKeyVisibility();
+}
+
+void UCrimeGameInstanceSubsystem::RefreshInteracterKeyVisibility()
+{
 	UGameInstance* GameInstance = GetGameInstance();
 	UWorld* World = GetWorld();
 
@@ -71,18 +80,30 @@ void UCrimeGameInstanceSubsystem::SetInteracterKeyVisible(bool bVisible)
 	APlayerController* PlayerController =
 		GameInstance->GetFirstLocalPlayerController(World);
 
-	if (!PlayerController)
+	if (!IsValid(PlayerController))
 	{
 		return;
 	}
 
-	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
-	if (!CrimeHUD)
+	ACrimeHUD* CrimeHUD =
+		PlayerController->GetHUD<ACrimeHUD>();
+
+	if (!IsValid(CrimeHUD))
 	{
 		return;
 	}
 
-	CrimeHUD->SetInteracterKeyVisible(bVisible);
+	const ACrimeCharacter* PlayerCharacter =
+		Cast<ACrimeCharacter>(PlayerController->GetPawn());
+
+	const bool bLightOn =
+		IsValid(PlayerCharacter) && PlayerCharacter->IsLightOn();
+
+	// [수정] 위에서 선언한 변수 사용
+	const bool bShouldShow =
+		bInteracterKeyRequestedVisible && bLightOn;
+
+	CrimeHUD->SetInteracterKeyVisible(bShouldShow);
 }
 
 void UCrimeGameInstanceSubsystem::SetPuzzleSceneActive(
@@ -169,6 +190,18 @@ bool UCrimeGameInstanceSubsystem::AddItemToPlayerInventory(FName ItemId)
 	if (!ItemData) return false;
 
 	return Inventory->AddItem(*ItemData);
+}
+
+bool UCrimeGameInstanceSubsystem::CheckPlayerInventorySpace()
+{
+	UInventoryComponent* Inventory = GetPlayerInventory();
+
+	if (!IsValid(Inventory))
+	{
+		return false;
+	}
+
+	return Inventory->CheckPickupSpace();
 }
 
 
@@ -415,4 +448,32 @@ void UCrimeGameInstanceSubsystem::SetPlayerControlEnabled(bool bEnabled)
 	const bool bIgnoreInput = !bEnabled;
 	PlayerController->SetIgnoreMoveInput(bIgnoreInput);
 	PlayerController->SetIgnoreLookInput(bIgnoreInput);
+}
+
+void UCrimeGameInstanceSubsystem::HidePlayerBaseUI()
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!IsValid(GameInstance) || !IsValid(World))
+	{
+		return;
+	}
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController))
+	{
+		return;
+	}
+
+	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
+
+	if (!IsValid(CrimeHUD))
+	{
+		return;
+	}
+
+	CrimeHUD->HideBaseWidget();
 }

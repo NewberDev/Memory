@@ -55,6 +55,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	TArray<FInventoryItem> GetItems() const;
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	bool CheckPickupSpace();
+
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnInventoryChanged OnInventoryChanged;
 

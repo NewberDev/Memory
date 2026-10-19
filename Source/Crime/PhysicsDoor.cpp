@@ -3,6 +3,7 @@
 
 #include "PhysicsDoor.h"
 #include "InteractionComponent.h" 
+#include "CrimeGameInstanceSubsystem.h"
 
 // Sets default values
 APhysicsDoor::APhysicsDoor()
@@ -30,11 +31,27 @@ void APhysicsDoor::BeginPlay()
 	}
 }
 
+void APhysicsDoor::DoorUnlock()
+{
+	bIsUnlock = true;
+}
+
 // [추가] 상호작용 요청을 블루프린트 이벤트로 전달
 void APhysicsDoor::HandleInteraction(AActor* InteractingActor)
 {
-	if (!IsValid(InteractingActor))
+	if (!IsValid(InteractingActor)) return;
+
+	if (!bIsUnlock)
 	{
+		if (bShowLockedMessage && !LockedTextId.IsNone())
+		{
+			if (UCrimeGameInstanceSubsystem* Subsystem =
+				UCrimeGameInstanceSubsystem::Get(this))
+			{
+				Subsystem->ShowCenterMessageTextId(LockedTextId);
+			}
+		}
+
 		return;
 	}
 

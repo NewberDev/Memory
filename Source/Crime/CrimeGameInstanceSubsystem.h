@@ -18,6 +18,10 @@ class CRIME_API UCrimeGameInstanceSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
+private:
+	UPROPERTY(Transient)
+	bool bInteracterKeyRequestedVisible = false;
+
 public:
 
 	// 현재 월드의 GameInstanceSubsystem을 가져온다.
@@ -39,6 +43,9 @@ public:
 		//UPARAM(meta = (GetOptions = "Crime.CrimeGameInstanceSubsystem.GetItemIdOptions"))
 		FName ItemId
 	);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	bool CheckPlayerInventorySpace();
 
 	UFUNCTION(BlueprintPure, Category = "Item Data", meta = (DisplayName = "Select Item ID"))
 	FName SelectItemId(
@@ -78,5 +85,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	void SetPlayerControlEnabled(bool bEnabled);
+
+	void RefreshInteracterKeyVisibility();
+
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void HidePlayerBaseUI();
 	
 };

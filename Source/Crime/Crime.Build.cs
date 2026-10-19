@@ -13,7 +13,8 @@ public class Crime : ModuleRules
 			"CoreUObject", 
 			"Engine", 
 			"InputCore",
-			"UMG",
+            "EnhancedInput",
+            "UMG",
             "AssetRegistry" //블루프린트 노드에 항목을 넣어서 작성하기 위한 구성으로 보인다.
         });
 
