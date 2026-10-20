@@ -432,22 +432,25 @@ void UCrimeGameInstanceSubsystem::SetPlayerControlEnabled(bool bEnabled)
 	UGameInstance* GameInstance = GetGameInstance();
 	UWorld* World = GetWorld();
 
-	if (!GameInstance || !World)
-	{
-		return;
-	}
+	if (!GameInstance || !World) return;
 
 	APlayerController* PlayerController =
 		GameInstance->GetFirstLocalPlayerController(World);
 
-	if (!PlayerController)
-	{
-		return;
-	}
+	if (!PlayerController) return;
 
-	const bool bIgnoreInput = !bEnabled;
-	PlayerController->SetIgnoreMoveInput(bIgnoreInput);
-	PlayerController->SetIgnoreLookInput(bIgnoreInput);
+	APawn* PlayerPawn = PlayerController->GetPawn();
+
+	if (!IsValid(PlayerPawn)) return;
+
+	if (bEnabled)
+	{
+		PlayerPawn->EnableInput(PlayerController);
+	}
+	else
+	{
+		PlayerPawn->DisableInput(PlayerController);
+	}
 }
 
 void UCrimeGameInstanceSubsystem::HidePlayerBaseUI()
