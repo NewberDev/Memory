@@ -119,7 +119,7 @@ void ACrimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
     if (ensureMsgf(InteractionAction, TEXT("InteractionAction is not assigned.")))
     {
         EnhancedInput->BindAction(InteractionAction, ETriggerEvent::Started, this, &ACrimeCharacter::Interact);
-    }
+    ::}
 
     if (ensureMsgf(DashAction, TEXT("DashAction is not assigned.")))
     {
