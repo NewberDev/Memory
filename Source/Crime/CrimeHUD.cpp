@@ -43,3 +43,29 @@ void ACrimeHUD::CreateBaseWidget()
 	SetInteracterKeyVisible(false);
 }
 
+void ACrimeHUD::OpenItemInspectWidget(TSubclassOf<UUserWidget> WidgetClass)
+{
+	if (!WidgetClass || IsValid(ItemInspectWidgetInstance)) return;
+
+	APlayerController* PlayerController = GetOwningPlayerController();
+
+	if (!IsValid(PlayerController)) return;
+
+	ItemInspectWidgetInstance = CreateWidget<UUserWidget>(
+		PlayerController,
+		WidgetClass);
+
+	if (!IsValid(ItemInspectWidgetInstance)) return;
+
+	ItemInspectWidgetInstance->AddToViewport(200);
+
+}
+
+void ACrimeHUD::CloseItemInspectWidget()
+{
+	if (!IsValid(ItemInspectWidgetInstance)) return;
+
+	ItemInspectWidgetInstance->RemoveFromParent();
+	ItemInspectWidgetInstance = nullptr;
+}
+

@@ -90,5 +90,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void HidePlayerBaseUI();
+
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void InspectInventoryItem(int32 ItemIndex);
 	
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void CloseInventoryItemInspect();
 };

@@ -119,7 +119,7 @@ void ACrimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
     if (ensureMsgf(InteractionAction, TEXT("InteractionAction is not assigned.")))
     {
         EnhancedInput->BindAction(InteractionAction, ETriggerEvent::Started, this, &ACrimeCharacter::Interact);
-    ::}
+    }
 
     if (ensureMsgf(DashAction, TEXT("DashAction is not assigned.")))
     {
@@ -230,6 +230,13 @@ void ACrimeCharacter::Interact()
     const FVector ForwardDirection =
         GetActorForwardVector().GetSafeNormal2D();
 
+    const float MinFacingDot = FMath::Cos(
+        FMath::DegreesToRadians(InteractionHalfAngleDegrees));
+
+    const FVector InteractionOrigin =
+        PlayerLocation
+        - ForwardDirection * InteractionOriginBackwardOffset;
+
     for (AActor* TargetActor : OverlappingActors)
     {
         if (!IsValid(TargetActor) || TargetActor == this)
@@ -240,23 +247,18 @@ void ACrimeCharacter::Interact()
         UInteractionComponent* TargetInteraction =
             UInteractionComponent::FindInteractionComponent(TargetActor);
 
-        if (!IsValid(TargetInteraction))
-        {
-            continue;
-        }
+        if (!IsValid(TargetInteraction)) continue;
 
         const FVector DirectionToTarget =
-            (TargetActor->GetActorLocation() - PlayerLocation)
+            (TargetActor->GetActorLocation() - InteractionOrigin)
             .GetSafeNormal2D();
 
         const float FacingDot =
             FVector::DotProduct(ForwardDirection, DirectionToTarget);
 
-        if (FacingDot > 0.766f)
+        if (FacingDot > MinFacingDot)
         {
-
             TargetInteraction->OnInteraction(this);
-
             break;
         }
     }
@@ -307,35 +309,7 @@ void ACrimeCharacter::ShowInventoryItemHint(int32 ItemIndex)
     UCrimeGameInstanceSubsystem* Subsystem =
         UCrimeGameInstanceSubsystem::Get(this);
 
-    if (!IsValid(Subsystem))
-    {
-        UE_LOG(LogTemp, Warning,
-            TEXT("[InventoryHint] Subsystem is invalid"));
-        return;
-    }
+    if (!IsValid(Subsystem)) return;
 
-    // [수정] 아이템을 추가할 때와 동일한 경로로 인벤토리 조회
-    UInventoryComponent* PlayerInventory =
-        Subsystem->GetPlayerInventory();
-
-    if (!IsValid(PlayerInventory))
-    {
-        UE_LOG(LogTemp, Warning,
-            TEXT("[InventoryHint] PlayerInventory is invalid"));
-        return;
-    }
-
-    const TArray<FInventoryItem> Items =
-        PlayerInventory->GetItems();
-
-
-    if (!Items.IsValidIndex(ItemIndex))
-    {
-        UE_LOG(LogTemp, Warning,
-            TEXT("[InventoryHint] Slot is empty"));
-        return;
-    }
-
-    Subsystem->ShowCenterMessageText(Items[ItemIndex].Hint);
-    Subsystem->PlayInventoryHintAnimation(ItemIndex);
+    Subsystem->InspectInventoryItem(ItemIndex);
 }

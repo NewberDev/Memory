@@ -42,6 +42,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "HUD|Inventory")
 	void PlayInventoryHintAnimation(int32 InventoryIndex);
 
+	UFUNCTION(BlueprintCallable, Category = "HUD|Inventory")
+	void OpenItemInspectWidget(TSubclassOf<UUserWidget> WidgetClass);
+
+	UFUNCTION(BlueprintCallable, Category = "HUD|Inventory")
+	void CloseItemInspectWidget();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -51,4 +57,7 @@ protected:
 	// HUD 블루프린트에서 이 참조로 위젯 내부 이미지에 접근합니다.
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "HUD")
 	TObjectPtr<UUserWidget> BaseWidgetInstance;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UUserWidget> ItemInspectWidgetInstance = nullptr;
 };

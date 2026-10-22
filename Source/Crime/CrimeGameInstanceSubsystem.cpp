@@ -14,6 +14,7 @@
 #include "ItemDatabaseAsset.h"
 #include "TextDatabaseAsset.h" 
 #include "CrimeCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 UCrimeGameInstanceSubsystem* UCrimeGameInstanceSubsystem::Get(const UObject* WorldContextObject)
@@ -133,6 +134,8 @@ void UCrimeGameInstanceSubsystem::SetPuzzleSceneActive(
 
 		PlayerController->SetInputMode(InputMode);
 		PlayerController->bShowMouseCursor = true;
+
+		PlayerController->FlushPressedKeys();
 
 		if (ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>())
 		{
@@ -479,4 +482,64 @@ void UCrimeGameInstanceSubsystem::HidePlayerBaseUI()
 	}
 
 	CrimeHUD->HideBaseWidget();
+}
+
+
+void UCrimeGameInstanceSubsystem::InspectInventoryItem(int32 ItemIndex)
+{ 
+	UInventoryComponent* PlayerInventory = GetPlayerInventory();
+
+	if (!IsValid(PlayerInventory)) return;
+
+
+	const TArray<FInventoryItem> Items = PlayerInventory->GetItems();
+
+	if (!Items.IsValidIndex(ItemIndex)) return;
+
+	const FInventoryItem& Item = Items[ItemIndex];
+
+	// WBP가 없으면 기존 힌트 출력
+	if (!Item.InspectWidgetClass)
+	{
+		ShowCenterMessageText(Item.Hint);
+		PlayInventoryHintAnimation(ItemIndex);
+		return;
+	}
+
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!GameInstance || !World) return;
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController)) return;
+
+	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
+
+	if (!IsValid(CrimeHUD)) return;
+
+	// [추가] WBP 클래스를 HUD에 전달하여 열기
+	CrimeHUD->OpenItemInspectWidget(Item.InspectWidgetClass);
+}
+
+void UCrimeGameInstanceSubsystem::CloseInventoryItemInspect()
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!GameInstance || !World) return;
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController)) return;
+
+	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
+
+	if (!IsValid(CrimeHUD)) return;
+
+	//HUD에 닫기 요청
+	CrimeHUD->CloseItemInspectWidget();
 }

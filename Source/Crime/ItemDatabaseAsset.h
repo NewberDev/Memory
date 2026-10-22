@@ -8,6 +8,7 @@
 
 
 class UTexture2D;
+class UUserWidget;
 
 USTRUCT(BlueprintType)
 struct FInventoryItem
@@ -25,6 +26,9 @@ struct FInventoryItem
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item", meta = (MultiLine = "true"))
 	FString Hint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Inspect")
+	TSubclassOf<UUserWidget> InspectWidgetClass;
 };
 /**
  * 

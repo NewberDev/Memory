@@ -93,6 +93,14 @@ private:
 		meta = (ClampMin = "0.0"))
 	float DashSpeed = 450.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Interaction",
+		meta = (ClampMin = "0.0", ClampMax = "180.0", Units = "Degrees"))
+	float InteractionHalfAngleDegrees = 50.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Interaction",
+		meta = (ClampMin = "0.0", Units = "cm"))
+	float InteractionOriginBackwardOffset = 30.0f;
+
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "Light",
 		meta = (AllowPrivateAccess = "true"))
 	bool bIsLightOn = true;
