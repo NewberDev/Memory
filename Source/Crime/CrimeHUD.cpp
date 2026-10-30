@@ -69,3 +69,35 @@ void ACrimeHUD::CloseItemInspectWidget()
 	ItemInspectWidgetInstance = nullptr;
 }
 
+void ACrimeHUD::OpenEscWidget()
+{
+	if (!EscWidgetClass) return;
+
+	if (!IsValid(EscWidgetInstance))
+	{
+		APlayerController* PlayerController = GetOwningPlayerController();
+
+		if (!IsValid(PlayerController)) return;
+
+		EscWidgetInstance = CreateWidget<UUserWidget>(
+			PlayerController, EscWidgetClass);
+	}
+
+	if (!IsValid(EscWidgetInstance)) return;
+
+	if (!EscWidgetInstance->IsInViewport())
+	{
+		EscWidgetInstance->AddToViewport(300);
+	}
+
+	// WBP_Esc가 Esc 키를 받을 수 있도록 포커스 지정
+	EscWidgetInstance->SetKeyboardFocus();
+}
+
+void ACrimeHUD::CloseEscWidget()
+{
+	if (!IsValid(EscWidgetInstance)) return;
+
+	EscWidgetInstance->RemoveFromParent();
+
+}

@@ -44,6 +44,8 @@ void ACrimeCharacter::BeginPlay()
 	Super::BeginPlay();
 
     bIsLightOn = true;
+
+    GetCharacterMovement()->RotationRate.Yaw = WalkRotationRate;
 }
 
 void ACrimeCharacter::PossessedBy(AController* NewController)
@@ -133,13 +135,14 @@ void ACrimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
         EnhancedInput->BindAction(DashAction, ETriggerEvent::Canceled, this, &ACrimeCharacter::StopDash);
     }
 
-    if (ensureMsgf(LightAction, TEXT("LightAction is not assigned.")))
+    if (ensureMsgf(SettingsAction,
+        TEXT("SettingsAction is not assigned.")))
     {
         EnhancedInput->BindAction(
-            LightAction,
+            SettingsAction,
             ETriggerEvent::Started,
             this,
-            &ACrimeCharacter::ToggleLight);
+            &ACrimeCharacter::OpenSettings);
     }
 
     const FKey HintKeys[] =
@@ -267,11 +270,15 @@ void ACrimeCharacter::Interact()
 void ACrimeCharacter::StartDash()
 {
     GetCharacterMovement()->MaxWalkSpeed = DashSpeed;
+
+    GetCharacterMovement()->RotationRate.Yaw = DashRotationRate;
 }
 
 void ACrimeCharacter::StopDash()
 {
     GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
+    GetCharacterMovement()->RotationRate.Yaw = WalkRotationRate;
 }
 
 void ACrimeCharacter::ToggleLight()
@@ -312,4 +319,13 @@ void ACrimeCharacter::ShowInventoryItemHint(int32 ItemIndex)
     if (!IsValid(Subsystem)) return;
 
     Subsystem->InspectInventoryItem(ItemIndex);
+}
+
+void ACrimeCharacter::OpenSettings()
+{
+    if (UCrimeGameInstanceSubsystem* Subsystem =
+        UCrimeGameInstanceSubsystem::Get(this))
+    {
+        Subsystem->OpenSettings();
+    }
 }

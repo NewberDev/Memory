@@ -48,6 +48,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD|Inventory")
 	void CloseItemInspectWidget();
 
+	void OpenEscWidget();
+
+	void CloseEscWidget();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -60,4 +64,10 @@ protected:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UUserWidget> ItemInspectWidgetInstance = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD|Settings")
+	TSubclassOf<UUserWidget> EscWidgetClass;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UUserWidget> EscWidgetInstance = nullptr;
 };

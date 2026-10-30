@@ -15,6 +15,7 @@
 #include "TextDatabaseAsset.h" 
 #include "CrimeCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "CrimeGameInstance.h"
 
 
 UCrimeGameInstanceSubsystem* UCrimeGameInstanceSubsystem::Get(const UObject* WorldContextObject)
@@ -484,6 +485,34 @@ void UCrimeGameInstanceSubsystem::HidePlayerBaseUI()
 	CrimeHUD->HideBaseWidget();
 }
 
+void UCrimeGameInstanceSubsystem::ShowPlayerBaseUI()
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!IsValid(GameInstance) || !IsValid(World))
+	{
+		return;
+	}
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController))
+	{
+		return;
+	}
+
+	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
+
+	if (!IsValid(CrimeHUD))
+	{
+		return;
+	}
+
+	CrimeHUD->ShowBaseWidget();
+}
+
 
 void UCrimeGameInstanceSubsystem::InspectInventoryItem(int32 ItemIndex)
 { 
@@ -491,20 +520,12 @@ void UCrimeGameInstanceSubsystem::InspectInventoryItem(int32 ItemIndex)
 
 	if (!IsValid(PlayerInventory)) return;
 
-
 	const TArray<FInventoryItem> Items = PlayerInventory->GetItems();
 
 	if (!Items.IsValidIndex(ItemIndex)) return;
 
 	const FInventoryItem& Item = Items[ItemIndex];
 
-	// WBP가 없으면 기존 힌트 출력
-	if (!Item.InspectWidgetClass)
-	{
-		ShowCenterMessageText(Item.Hint);
-		PlayInventoryHintAnimation(ItemIndex);
-		return;
-	}
 
 	UGameInstance* GameInstance = GetGameInstance();
 	UWorld* World = GetWorld();
@@ -516,12 +537,51 @@ void UCrimeGameInstanceSubsystem::InspectInventoryItem(int32 ItemIndex)
 
 	if (!IsValid(PlayerController)) return;
 
+	switch (Item.UseAction)
+	{
+	case EItemUseAction::ToggleLight:
+	{
+		ACrimeCharacter* PlayerCharacter =
+			Cast<ACrimeCharacter>(PlayerController->GetPawn());
+
+		if (!IsValid(PlayerCharacter)) return;
+
+		// 캐릭터에는 enum을 전달하지 않고, 결정된 기능만 실행 요청
+		PlayerCharacter->ToggleLight();
+		return;
+	}
+
+	case EItemUseAction::None:
+		// 실행 기능이 없으면 아래 WBP / Hint 분기로 진행
+		break;
+
+	default:
+		// 아직 처리하지 않은 기능은 실행하지 않음
+		return;
+	}
+
+	// WBP가 없으면 기존 힌트 출력
+	if (!Item.InspectWidgetClass)
+	{
+		ShowCenterMessageText(Item.Hint);
+		PlayInventoryHintAnimation(ItemIndex);
+		return;
+	}
+
 	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
 
 	if (!IsValid(CrimeHUD)) return;
 
-	// [추가] WBP 클래스를 HUD에 전달하여 열기
+	// WBP 클래스를 HUD에 전달하여 열기
 	CrimeHUD->OpenItemInspectWidget(Item.InspectWidgetClass);
+
+	SetPlayerControlEnabled(false);
+
+	FInputModeUIOnly InputMode;
+	PlayerController->SetInputMode(InputMode);
+	PlayerController->bShowMouseCursor = true;
+
+	PlayerController->FlushPressedKeys();
 }
 
 void UCrimeGameInstanceSubsystem::CloseInventoryItemInspect()
@@ -542,4 +602,129 @@ void UCrimeGameInstanceSubsystem::CloseInventoryItemInspect()
 
 	//HUD에 닫기 요청
 	CrimeHUD->CloseItemInspectWidget();
+
+	FInputModeGameOnly InputMode;
+	PlayerController->SetInputMode(InputMode);
+	PlayerController->bShowMouseCursor = false;
+
+	PlayerController->FlushPressedKeys();
+	SetPlayerControlEnabled(true);
+}
+
+void UCrimeGameInstanceSubsystem::OpenSettings()
+{
+	if (bSettingsOpen) return;
+
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!GameInstance || !World) return;
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController)) return;
+
+	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
+
+	if (!IsValid(CrimeHUD)) return;
+
+	bSettingsOpen = true;
+
+	// [추가] 기존 함수로 캐릭터 입력 차단
+	SetPlayerControlEnabled(false);
+	PlayerController->FlushPressedKeys();
+
+	// [추가] UI 조작 및 마우스 커서 활성화
+	FInputModeUIOnly InputMode;
+	PlayerController->SetInputMode(InputMode);
+	PlayerController->bShowMouseCursor = true;
+
+	// UI 입력 모드 전환 후 창을 열고 포커스 지정
+	CrimeHUD->OpenEscWidget();
+}
+
+void UCrimeGameInstanceSubsystem::CloseSettings()
+{
+	if (!bSettingsOpen) return;
+
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!GameInstance || !World) return;
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController)) return;
+
+	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
+
+	if (!IsValid(CrimeHUD)) return;
+
+	CrimeHUD->CloseEscWidget();
+
+	bSettingsOpen = false;
+
+	// [추가] 게임 입력 및 커서 상태 복구
+	FInputModeGameOnly InputMode;
+	PlayerController->SetInputMode(InputMode);
+	PlayerController->bShowMouseCursor = false;
+
+	PlayerController->FlushPressedKeys();
+	SetPlayerControlEnabled(true);
+}
+
+float UCrimeGameInstanceSubsystem::GetMasterVolume() const
+{
+	const UCrimeGameInstance* CrimeGameInstance =
+		Cast<UCrimeGameInstance>(GetGameInstance());
+
+	if (!IsValid(CrimeGameInstance))
+	{
+		UE_LOG(
+			LogTemp,
+			Warning,
+			TEXT("GetMasterVolume: GameInstance must inherit from UCrimeGameInstance.")
+		);
+		return 100.0f;
+	}
+
+	return CrimeGameInstance->GetMasterVolume();
+}
+
+void UCrimeGameInstanceSubsystem::SetMasterVolume(float NewVolume)
+{
+	UCrimeGameInstance* CrimeGameInstance =
+		Cast<UCrimeGameInstance>(GetGameInstance());
+
+	if (!IsValid(CrimeGameInstance))
+	{
+		UE_LOG(
+			LogTemp,
+			Warning,
+			TEXT("SetMasterVolume: GameInstance must inherit from UCrimeGameInstance.")
+		);
+		return;
+	}
+
+	CrimeGameInstance->SetMasterVolume(NewVolume);
+}
+
+void UCrimeGameInstanceSubsystem::ApplyMasterVolume()
+{
+	UCrimeGameInstance* CrimeGameInstance =
+		Cast<UCrimeGameInstance>(GetGameInstance());
+
+	if (!IsValid(CrimeGameInstance))
+	{
+		UE_LOG(
+			LogTemp,
+			Warning,
+			TEXT("ApplyMasterVolume: GameInstance must inherit from UCrimeGameInstance.")
+		);
+		return;
+	}
+
+	CrimeGameInstance->ApplyMasterVolume();
 }

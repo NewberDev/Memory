@@ -10,6 +10,13 @@
 class UTexture2D;
 class UUserWidget;
 
+UENUM(BlueprintType)
+enum class EItemUseAction : uint8
+{
+	None        UMETA(DisplayName = "None"),
+	ToggleLight UMETA(DisplayName = "Toggle Light")
+};
+
 USTRUCT(BlueprintType)
 struct FInventoryItem
 {
@@ -29,6 +36,9 @@ struct FInventoryItem
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Inspect")
 	TSubclassOf<UUserWidget> InspectWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Use")
+	EItemUseAction UseAction = EItemUseAction::None;
 };
 /**
  * 

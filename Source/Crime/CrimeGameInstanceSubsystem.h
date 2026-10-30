@@ -22,6 +22,9 @@ private:
 	UPROPERTY(Transient)
 	bool bInteracterKeyRequestedVisible = false;
 
+	UPROPERTY(Transient)
+	bool bSettingsOpen = false;
+
 public:
 
 	// 현재 월드의 GameInstanceSubsystem을 가져온다.
@@ -68,6 +71,7 @@ public:
 	UFUNCTION()
 	static TArray<FString> GetTextIdOptions();
 
+	//출력문 함수
 	UFUNCTION(BlueprintCallable, Category = "HUD|Messages")
 	void ShowCenterMessageText(const FString& Message);
 
@@ -80,21 +84,44 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUDFade")
 	void OnFadeEffect();
 
-	UFUNCTION(BlueprintCallable, Category = "HUD|Inventory")
-	void PlayInventoryHintAnimation(int32 InventoryIndex);
-
+	//플레이어 조작 제어
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	void SetPlayerControlEnabled(bool bEnabled);
+
+	// UI 셋팅
+	UFUNCTION(BlueprintCallable, Category = "HUD|Inventory")
+	void PlayInventoryHintAnimation(int32 InventoryIndex);
 
 	void RefreshInteracterKeyVisibility();
 
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void HidePlayerBaseUI();
 
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void ShowPlayerBaseUI();
 
+
+	//인벤토리 셋팅
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void InspectInventoryItem(int32 ItemIndex);
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void CloseInventoryItemInspect();
+
+	UFUNCTION(BlueprintCallable, Category = "Settings")
+	void OpenSettings();
+
+	UFUNCTION(BlueprintCallable, Category = "Settings")
+	void CloseSettings();
+
+
+	//사운드 셋팅
+	UFUNCTION(BlueprintPure, Category = "Settings|Audio")
+	float GetMasterVolume() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Settings|Audio")
+	void SetMasterVolume(float NewVolume);
+
+	UFUNCTION(BlueprintCallable, Category = "Settings|Audio")
+	void ApplyMasterVolume();
 };

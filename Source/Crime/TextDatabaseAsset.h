@@ -26,7 +26,7 @@ struct FMessageTextEntry
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class CRIME_API UTextDatabaseAsset : public UDataAsset
 {
 	GENERATED_BODY()

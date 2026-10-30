@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
 #include "CrimeCharacter.generated.h"
 
 class UInputMappingContext;
@@ -41,7 +42,7 @@ protected:
 	TObjectPtr<UInputAction> DashAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> LightAction;
+	TObjectPtr<UInputAction> SettingsAction;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "Input")
 	FVector2D LookInput = FVector2D::ZeroVector;
@@ -52,6 +53,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Light")
 	void LightOff();
 
+
 public:	
 
 	virtual void PossessedBy(AController* NewController) override;
@@ -61,6 +63,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void ToggleLight();
 
 	bool IsLightOn() const { return bIsLightOn; }
 private:
@@ -75,9 +79,9 @@ private:
 	void StartDash();
 	void StopDash();
 
-	void ToggleLight();
-
 	void ShowInventoryItemHint(int32 ItemIndex);
+
+	void OpenSettings();
 
 	UPROPERTY(VisibleAnywhere, Category = "Interaction")
 	TObjectPtr<USphereComponent> InteractionSphere;
@@ -92,6 +96,12 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Movement",
 		meta = (ClampMin = "0.0"))
 	float DashSpeed = 450.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Movement", meta = (ClampMin = "0.0"))
+	float WalkRotationRate = 200.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Movement", meta = (ClampMin = "0.0"))
+	float DashRotationRate = 400.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Interaction",
 		meta = (ClampMin = "0.0", ClampMax = "180.0", Units = "Degrees"))
