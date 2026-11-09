@@ -17,6 +17,7 @@
 #include "Components/InputComponent.h" 
 #include "InputCoreTypes.h"             
 #include "Framework/Commands/InputChord.h"
+#include "Animation/AnimInstance.h"
 
 // Sets default values
 ACrimeCharacter::ACrimeCharacter()
@@ -145,6 +146,16 @@ void ACrimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
             &ACrimeCharacter::OpenSettings);
     }
 
+    if (ensureMsgf(ShowControlsAction,
+        TEXT("ShowControlsAction is not assigned.")))
+    {
+        EnhancedInput->BindAction(
+            ShowControlsAction,
+            ETriggerEvent::Started,
+            this,
+            &ACrimeCharacter::ShowControls);
+    }
+
     const FKey HintKeys[] =
     {
         EKeys::One,
@@ -170,6 +181,13 @@ void ACrimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
         PlayerInputComponent->KeyBindings.Add(MoveTemp(HintBinding));
     }
 
+}
+
+void ACrimeCharacter::CancelDash()
+{
+    if (bIsDashing) StopDash();
+
+    OnBodyLookYawResetRequested();
 }
 
 void ACrimeCharacter::Move(const FInputActionValue& Value)
@@ -205,12 +223,56 @@ void ACrimeCharacter::Move(const FInputActionValue& Value)
 
 void ACrimeCharacter::Look(const FInputActionValue& Value)
 {
+    if (bIsDashing) return;
+
+    UAnimInstance* AnimInstance =
+        GetMesh() ? GetMesh()->GetAnimInstance() : nullptr;
+
+    if (AnimInstance && AnimInstance->IsAnyMontagePlaying())
+    {
+        return;
+    }
+
     LookInput = Value.Get<FVector2D>();
 
-    // 추후 추가:
-    // LookInput을 이용해 라이트의 조준 방향을 갱신한다.
-    //
-    // AddControllerYawInput / AddControllerPitchInput은 호출하지 않는다.
+    float HorizontalInput = LookInput.X;
+
+    if (APlayerController* PlayerController =
+        Cast<APlayerController>(GetController()))
+    {
+        const FVector CameraForward =
+            PlayerController->GetControlRotation().Vector();
+
+        const FVector CharacterForward = GetActorForwardVector();
+
+        // 카메라 정면이 캐릭터 뒤쪽 반구에 있을 때만 좌우 입력을 반전한다.
+        if (FVector::DotProduct(CameraForward, CharacterForward) < 0.0f)
+        {
+            HorizontalInput *= -1.0f;
+        }
+    }
+
+    BodyLookYaw += HorizontalInput * BodyLookSensitivity;
+
+    // 좌우 회전 각도를 제한한다.
+    BodyLookYaw = FMath::Clamp(
+        BodyLookYaw,
+        -MaxBodyLookYaw,
+        MaxBodyLookYaw);
+
+
+    /*
+    if (GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(
+            1001,                 // 매번 같은 키를 사용해 한 줄을 갱신
+            0.0f,                 // 다음 프레임까지 표시
+            FColor::Yellow,
+            FString::Printf(
+                TEXT("BodyLookYaw: %.2f deg | Mouse X: %.2f"),
+                BodyLookYaw,
+                LookInput.X));
+    }*/
 }
 
 void ACrimeCharacter::StopLook(const FInputActionValue& Value)
@@ -272,6 +334,9 @@ void ACrimeCharacter::StartDash()
     GetCharacterMovement()->MaxWalkSpeed = DashSpeed;
 
     GetCharacterMovement()->RotationRate.Yaw = DashRotationRate;
+
+    bIsDashing = true;
+    OnBodyLookYawResetRequested();
 }
 
 void ACrimeCharacter::StopDash()
@@ -279,6 +344,8 @@ void ACrimeCharacter::StopDash()
     GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
     GetCharacterMovement()->RotationRate.Yaw = WalkRotationRate;
+
+    bIsDashing = false;
 }
 
 void ACrimeCharacter::ToggleLight()
@@ -328,4 +395,17 @@ void ACrimeCharacter::OpenSettings()
     {
         Subsystem->OpenSettings();
     }
+}
+
+void ACrimeCharacter::ShowControls()
+{
+    UCrimeGameInstanceSubsystem* Subsystem =
+        UCrimeGameInstanceSubsystem::Get(this);
+
+    if (!IsValid(Subsystem))
+    {
+        return;
+    }
+
+    Subsystem->ShowControls();
 }

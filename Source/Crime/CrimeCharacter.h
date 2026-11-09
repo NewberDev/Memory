@@ -44,6 +44,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> SettingsAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> ShowControlsAction;
+
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "Input")
 	FVector2D LookInput = FVector2D::ZeroVector;
 
@@ -53,6 +56,17 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Light")
 	void LightOff();
 
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "Look",
+		meta = (AllowPrivateAccess = "true", Units = "Degrees"))
+	float BodyLookYaw = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Look",
+		meta = (ClampMin = "0.0", Units = "Degrees"))
+	float MaxBodyLookYaw = 20.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Look",
+		meta = (ClampMin = "0.0"))
+	float BodyLookSensitivity = 0.3f;
 
 public:	
 
@@ -67,6 +81,13 @@ public:
 	void ToggleLight();
 
 	bool IsLightOn() const { return bIsLightOn; }
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Look")
+	void OnBodyLookYawResetRequested();
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void CancelDash();
+
 private:
 	void Move(const FInputActionValue& Value);
 
@@ -82,6 +103,8 @@ private:
 	void ShowInventoryItemHint(int32 ItemIndex);
 
 	void OpenSettings();
+
+	void ShowControls();
 
 	UPROPERTY(VisibleAnywhere, Category = "Interaction")
 	TObjectPtr<USphereComponent> InteractionSphere;
@@ -114,4 +137,6 @@ private:
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "Light",
 		meta = (AllowPrivateAccess = "true"))
 	bool bIsLightOn = true;
+
+	bool bIsDashing = false;
 };

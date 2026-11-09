@@ -457,6 +457,26 @@ void UCrimeGameInstanceSubsystem::SetPlayerControlEnabled(bool bEnabled)
 	}
 }
 
+void UCrimeGameInstanceSubsystem::ResetPlayerBodyLookYaw()
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!IsValid(GameInstance) || !IsValid(World)) return;
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController)) return;
+
+	ACrimeCharacter* PlayerCharacter =
+		Cast<ACrimeCharacter>(PlayerController->GetPawn());
+
+	if (!IsValid(PlayerCharacter)) return;
+
+	PlayerCharacter->CancelDash();
+}
+
 void UCrimeGameInstanceSubsystem::HidePlayerBaseUI()
 {
 	UGameInstance* GameInstance = GetGameInstance();
@@ -673,6 +693,26 @@ void UCrimeGameInstanceSubsystem::CloseSettings()
 
 	PlayerController->FlushPressedKeys();
 	SetPlayerControlEnabled(true);
+}
+
+void UCrimeGameInstanceSubsystem::ShowControls()
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!GameInstance || !World) return;
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController)) return;
+
+	ACrimeHUD* CrimeHUD =
+		PlayerController->GetHUD<ACrimeHUD>();
+
+	if (!IsValid(CrimeHUD)) return;
+
+	CrimeHUD->ShowControls();
 }
 
 float UCrimeGameInstanceSubsystem::GetMasterVolume() const

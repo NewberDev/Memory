@@ -52,6 +52,9 @@ public:
 
 	void CloseEscWidget();
 
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "HUD")
+	void ShowControls();
+
 protected:
 	virtual void BeginPlay() override;
 

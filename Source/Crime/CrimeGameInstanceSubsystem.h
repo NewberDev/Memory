@@ -88,6 +88,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	void SetPlayerControlEnabled(bool bEnabled);
 
+	UFUNCTION(BlueprintCallable, Category = "Player|Look")
+	void ResetPlayerBodyLookYaw();
+
 	// UI 셋팅
 	UFUNCTION(BlueprintCallable, Category = "HUD|Inventory")
 	void PlayInventoryHintAnimation(int32 InventoryIndex);
@@ -100,6 +103,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void ShowPlayerBaseUI();
 
+	UFUNCTION(BlueprintCallable, Category = "Settings")
+	void OpenSettings();
+
+	UFUNCTION(BlueprintCallable, Category = "Settings")
+	void CloseSettings();
+
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void ShowControls();
+
 
 	//인벤토리 셋팅
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
@@ -107,12 +119,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void CloseInventoryItemInspect();
-
-	UFUNCTION(BlueprintCallable, Category = "Settings")
-	void OpenSettings();
-
-	UFUNCTION(BlueprintCallable, Category = "Settings")
-	void CloseSettings();
 
 
 	//사운드 셋팅

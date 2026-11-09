@@ -11,6 +11,8 @@ void ACrimeHUD::BeginPlay()
 	Super::BeginPlay();
 
 	CreateBaseWidget();
+
+	HideBaseWidget();
 }
 
 void ACrimeHUD::CreateBaseWidget()
@@ -41,6 +43,8 @@ void ACrimeHUD::CreateBaseWidget()
 	OnBaseWidgetCreated(BaseWidgetInstance);
 
 	SetInteracterKeyVisible(false);
+
+	
 }
 
 void ACrimeHUD::OpenItemInspectWidget(TSubclassOf<UUserWidget> WidgetClass)
