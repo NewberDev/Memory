@@ -127,6 +127,8 @@ void UCrimeGameInstanceSubsystem::SetPuzzleSceneActive(
 		PlayerController->SetIgnoreMoveInput(true);
 		PlayerController->SetIgnoreLookInput(true);
 
+		CancelPlayerBodyLookHoldForUI();
+
 		FInputModeUIOnly InputMode;
 		if (IsValid(PuzzleWidget))
 		{
@@ -477,6 +479,26 @@ void UCrimeGameInstanceSubsystem::ResetPlayerBodyLookYaw()
 	PlayerCharacter->CancelDash();
 }
 
+void UCrimeGameInstanceSubsystem::CancelPlayerBodyLookHoldForUI()
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!IsValid(GameInstance) || !IsValid(World)) return;
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController)) return;
+
+	ACrimeCharacter* PlayerCharacter =
+		Cast<ACrimeCharacter>(PlayerController->GetPawn());
+
+	if (!IsValid(PlayerCharacter)) return;
+
+	PlayerCharacter->CancelBodyLookHoldForUI();
+}
+
 void UCrimeGameInstanceSubsystem::HidePlayerBaseUI()
 {
 	UGameInstance* GameInstance = GetGameInstance();
@@ -589,8 +611,11 @@ void UCrimeGameInstanceSubsystem::InspectInventoryItem(int32 ItemIndex)
 	}
 
 	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
-
 	if (!IsValid(CrimeHUD)) return;
+
+	PlayerController->SetIgnoreLookInput(true);
+
+	CancelPlayerBodyLookHoldForUI();
 
 	// WBP 클래스를 HUD에 전달하여 열기
 	CrimeHUD->OpenItemInspectWidget(Item.InspectWidgetClass);
@@ -622,6 +647,8 @@ void UCrimeGameInstanceSubsystem::CloseInventoryItemInspect()
 
 	//HUD에 닫기 요청
 	CrimeHUD->CloseItemInspectWidget();
+
+	PlayerController->SetIgnoreLookInput(false);
 
 	FInputModeGameOnly InputMode;
 	PlayerController->SetInputMode(InputMode);

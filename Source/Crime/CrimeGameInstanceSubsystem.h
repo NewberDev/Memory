@@ -91,6 +91,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Player|Look")
 	void ResetPlayerBodyLookYaw();
 
+	UFUNCTION(BlueprintCallable, Category = "Player|Look")
+	void CancelPlayerBodyLookHoldForUI();
+
 	// UI ¼ÂÆÃ
 	UFUNCTION(BlueprintCallable, Category = "HUD|Inventory")
 	void PlayInventoryHintAnimation(int32 InventoryIndex);

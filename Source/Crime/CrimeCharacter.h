@@ -50,6 +50,12 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "Input")
 	FVector2D LookInput = FVector2D::ZeroVector;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> BodyLookHoldAction;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Look")
+	bool bIsBodyLookHeld = false;
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Light")
 	void LightOn();
 
@@ -66,7 +72,22 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Look",
 		meta = (ClampMin = "0.0"))
-	float BodyLookSensitivity = 0.3f;
+	float BodyLookSensitivity = 90.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Look",
+		meta = (ClampMin = "0.1"))
+	float CursorLookInterpSpeed = 12.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Look",
+		meta = (ClampMin = "0.0", ClampMax = "180.0", Units = "Degrees"))
+	float MaxCursorLookAngle = 70.0f;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Look")
+	float TargetBodyLookYaw = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Look",
+		meta = (ClampMin = "0.1"))
+	float BodyLookInterpSpeed = 6.0f;
 
 public:	
 
@@ -88,6 +109,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void CancelDash();
 
+	UFUNCTION(BlueprintCallable, Category = "Look")
+	void CancelBodyLookHoldForUI();
+
 private:
 	void Move(const FInputActionValue& Value);
 
@@ -105,6 +129,11 @@ private:
 	void OpenSettings();
 
 	void ShowControls();
+
+	void UpdateBodyLookFromMouseCursor();
+
+	void StartBodyLookHold();
+	void StopBodyLookHold();
 
 	UPROPERTY(VisibleAnywhere, Category = "Interaction")
 	TObjectPtr<USphereComponent> InteractionSphere;

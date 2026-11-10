@@ -56,28 +56,24 @@ void ACrimeCharacter::PossessedBy(AController* NewController)
     APlayerController* PlayerController =
         Cast<APlayerController>(NewController);
 
-    if (!PlayerController)
-    {
-        return;
-    }
+    if (!PlayerController) return;
 
     ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
-    if (!LocalPlayer)
-    {
-        return;
-    }
+    if (!LocalPlayer) return;
 
     UEnhancedInputLocalPlayerSubsystem* InputSubsystem =
         ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
             LocalPlayer);
 
-    if (!InputSubsystem || !DefaultMappingContext)
-    {
-        return;
-    }
+    if (!InputSubsystem || !DefaultMappingContext) return;
 
     // [추가] 플레이어가 캐릭터를 소유하는 시점에 컨텍스트 등록
     InputSubsystem->AddMappingContext(DefaultMappingContext, 0);
+
+    PlayerController->bShowMouseCursor = false;
+
+    FInputModeGameOnly InputMode;
+    PlayerController->SetInputMode(InputMode);
 }
 
 // Called every frame
@@ -85,6 +81,21 @@ void ACrimeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+    if (bIsBodyLookHeld)
+    {
+        UpdateBodyLookFromMouseCursor();
+    }
+
+    BodyLookYaw = FMath::FInterpTo(
+        BodyLookYaw,
+        TargetBodyLookYaw,
+        DeltaTime,
+        BodyLookInterpSpeed);
+
+    if (FMath::IsNearlyEqual(BodyLookYaw, TargetBodyLookYaw, 0.01f))
+    {
+        BodyLookYaw = TargetBodyLookYaw;
+    }
 }
 
 // Called to bind functionality to input
@@ -118,6 +129,18 @@ void ACrimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
         EnhancedInput->BindAction(LookAction, ETriggerEvent::Canceled, this, &ACrimeCharacter::StopLook);
     }
+
+    if (ensureMsgf(
+        BodyLookHoldAction,
+        TEXT("BodyLookHoldAction is not assigned.")))
+    {
+        EnhancedInput->BindAction( BodyLookHoldAction, ETriggerEvent::Started, this, &ACrimeCharacter::StartBodyLookHold);
+
+        EnhancedInput->BindAction( BodyLookHoldAction, ETriggerEvent::Completed, this, &ACrimeCharacter::StopBodyLookHold);
+
+        EnhancedInput->BindAction( BodyLookHoldAction, ETriggerEvent::Canceled, this, &ACrimeCharacter::StopBodyLookHold);
+    }
+
 
     if (ensureMsgf(InteractionAction, TEXT("InteractionAction is not assigned.")))
     {
@@ -190,6 +213,11 @@ void ACrimeCharacter::CancelDash()
     OnBodyLookYawResetRequested();
 }
 
+void ACrimeCharacter::CancelBodyLookHoldForUI()
+{
+    StopBodyLookHold();
+}
+
 void ACrimeCharacter::Move(const FInputActionValue& Value)
 {
     APlayerController* PlayerController =
@@ -223,7 +251,8 @@ void ACrimeCharacter::Move(const FInputActionValue& Value)
 
 void ACrimeCharacter::Look(const FInputActionValue& Value)
 {
-    if (bIsDashing) return;
+
+    if (bIsDashing || bIsBodyLookHeld) return;
 
     UAnimInstance* AnimInstance =
         GetMesh() ? GetMesh()->GetAnimInstance() : nullptr;
@@ -252,11 +281,16 @@ void ACrimeCharacter::Look(const FInputActionValue& Value)
         }
     }
 
-    BodyLookYaw += HorizontalInput * BodyLookSensitivity;
+    const UWorld* World = GetWorld();
+    const float DeltaTime = World ? World->GetDeltaSeconds() : 0.0f;
 
-    // 좌우 회전 각도를 제한한다.
-    BodyLookYaw = FMath::Clamp(
-        BodyLookYaw,
+    // 게임패드 입력을 초당 회전량으로 적용한다.
+    TargetBodyLookYaw += HorizontalInput * BodyLookSensitivity * DeltaTime;
+
+    //TargetBodyLookYaw += HorizontalInput * BodyLookSensitivity;
+
+    TargetBodyLookYaw = FMath::Clamp(
+        TargetBodyLookYaw,
         -MaxBodyLookYaw,
         MaxBodyLookYaw);
 
@@ -273,11 +307,12 @@ void ACrimeCharacter::Look(const FInputActionValue& Value)
                 BodyLookYaw,
                 LookInput.X));
     }*/
+
 }
 
 void ACrimeCharacter::StopLook(const FInputActionValue& Value)
 {
-    // 마우스를 멈췄을 때 이전 이동량이 남지 않도록 초기화
+    // 이동이 멈췄을때, 초기화.
     LookInput = FVector2D::ZeroVector;
 }
 
@@ -336,7 +371,8 @@ void ACrimeCharacter::StartDash()
     GetCharacterMovement()->RotationRate.Yaw = DashRotationRate;
 
     bIsDashing = true;
-    OnBodyLookYawResetRequested();
+
+    StopBodyLookHold();
 }
 
 void ACrimeCharacter::StopDash()
@@ -408,4 +444,109 @@ void ACrimeCharacter::ShowControls()
     }
 
     Subsystem->ShowControls();
+}
+
+
+void ACrimeCharacter::UpdateBodyLookFromMouseCursor()
+{
+    if (bIsDashing) return;
+
+    UAnimInstance* AnimInstance =
+        GetMesh() ? GetMesh()->GetAnimInstance() : nullptr;
+
+    if (AnimInstance && AnimInstance->IsAnyMontagePlaying())return;
+
+    APlayerController* PlayerController =
+        Cast<APlayerController>(GetController());
+
+    if (!IsValid(PlayerController)) return;
+
+    FVector RayOrigin;
+    FVector RayDirection;
+
+    if (!PlayerController->DeprojectMousePositionToWorld(
+        RayOrigin,
+        RayDirection))
+    {
+        return;
+    }
+    // 마우스 광선과 캐릭터 높이의 수평면이 만나는 지점을 구한다.
+    if (FMath::IsNearlyZero(RayDirection.Z)) return;
+
+    const float DistanceToPlayerHeight =
+        (GetActorLocation().Z - RayOrigin.Z) / RayDirection.Z;
+
+    if (DistanceToPlayerHeight <= 0.0f) return;
+
+    const FVector MouseWorldPoint =
+        RayOrigin + RayDirection * DistanceToPlayerHeight;
+
+    FVector DirectionToMouse =
+        MouseWorldPoint - GetActorLocation();
+
+    DirectionToMouse.Z = 0.0f;
+
+    if (!DirectionToMouse.Normalize()) return;
+
+    FVector CharacterForward = GetActorForwardVector();
+    CharacterForward.Z = 0.0f;
+
+    if (!CharacterForward.Normalize()) return;
+
+    const float CrossZ =
+        FVector::CrossProduct(CharacterForward, DirectionToMouse).Z;
+
+    const float Dot =
+        FVector::DotProduct(CharacterForward, DirectionToMouse);
+
+    const float CursorAngle =
+        FMath::RadiansToDegrees(FMath::Atan2(CrossZ, Dot));
+
+  
+    TargetBodyLookYaw = FMath::Clamp(
+        CursorAngle,
+        -MaxBodyLookYaw,
+        MaxBodyLookYaw);
+}
+
+void ACrimeCharacter::StartBodyLookHold()
+{
+    if (bIsDashing) return;
+
+    bIsBodyLookHeld = true;
+
+    if (APlayerController* PlayerController =
+        Cast<APlayerController>(GetController()))
+    {
+        PlayerController->bShowMouseCursor = true;
+
+        FInputModeGameAndUI InputMode;
+        InputMode.SetHideCursorDuringCapture(false);
+        InputMode.SetLockMouseToViewportBehavior(
+            EMouseLockMode::DoNotLock);
+
+        PlayerController->SetInputMode(InputMode);
+    }
+
+    // 버튼을 누른 순간 커서 위치도 반영한다.
+    UpdateBodyLookFromMouseCursor();
+}
+
+void ACrimeCharacter::StopBodyLookHold()
+{
+    bIsBodyLookHeld = false;
+    TargetBodyLookYaw = 0.0f;
+
+    APlayerController* PlayerController =
+        Cast<APlayerController>(GetController());
+
+    if (!IsValid(PlayerController)) return;
+
+    // 퍼즐 UI가 입력을 소유 중이면 UIOnly 모드와 커서 상태를 유지한다.
+    if (PlayerController->IsLookInputIgnored()) return;
+
+    PlayerController->bShowMouseCursor = false;
+
+    FInputModeGameOnly InputMode;
+    PlayerController->SetInputMode(InputMode);
 }
