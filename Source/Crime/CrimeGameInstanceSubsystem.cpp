@@ -683,7 +683,7 @@ void UCrimeGameInstanceSubsystem::OpenSettings()
 	PlayerController->FlushPressedKeys();
 
 	// [추가] UI 조작 및 마우스 커서 활성화
-	FInputModeUIOnly InputMode;
+	FInputModeGameAndUI InputMode;
 	PlayerController->SetInputMode(InputMode);
 	PlayerController->bShowMouseCursor = true;
 

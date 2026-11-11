@@ -503,10 +503,17 @@ void ACrimeCharacter::UpdateBodyLookFromMouseCursor()
         FMath::RadiansToDegrees(FMath::Atan2(CrossZ, Dot));
 
   
-    TargetBodyLookYaw = FMath::Clamp(
-        CursorAngle,
-        -MaxBodyLookYaw,
-        MaxBodyLookYaw);
+    constexpr float MouseAngleLimit = 60.0f;
+    constexpr float BodyYawLimit = 20.0f;
+
+    const float ClampedCursorAngle =
+        FMath::Clamp(CursorAngle, -MouseAngleLimit, MouseAngleLimit);
+
+    const float AngleToBodyYawRatio =
+        BodyYawLimit / MouseAngleLimit;
+
+    TargetBodyLookYaw =
+        ClampedCursorAngle * AngleToBodyYawRatio;
 }
 
 void ACrimeCharacter::StartBodyLookHold()

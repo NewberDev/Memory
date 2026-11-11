@@ -87,7 +87,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Look",
 		meta = (ClampMin = "0.1"))
-	float BodyLookInterpSpeed = 6.0f;
+	float BodyLookInterpSpeed = 4.0f;
 
 public:	
 
