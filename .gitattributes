@@ -1,2 +1,33 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Large Unreal assets for the hospital map
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_Aba_Supplies_Plank_Wood_Worn_01/SM_Ind_Aba_Supplies_Plank_Wood_Worn_01.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_Tra_Bags_Plastic_Pack_01/SM_Ind_Tra_Bags_Plastic_Pack_01.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_Rub_Pile_Debris_Concrete_M_01/SM_Ind_Rub_Pile_Debris_Concrete_M_01.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Urb_Str_Bin_Trash_Metal_Worn_01/SM_Urb_Str_Bin_Trash_Metal_Worn_01_B.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Project001/UE5_textures/Tiles_Textures/T_ugxjcdpn_8K_B.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Project001/UE5_textures/Tiles_Textures/T_ugxjcdpn_8K_N.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Urb_Str_Bin_Trash_Metal_Worn_02/SM_Urb_Str_Bin_Trash_Metal_Worn_02.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Project001/UE5_textures/Tiles_Textures/T_ugxjcdpn_8K_ORM.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_Aba_Tarp_Wrinkled_02/SM_Ind_Aba_Tarp_Wrinkled_02.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_War_Storage_Sheet_Cardboard_Flattened_02/SM_Ind_War_Storage_Sheet_Cardboard_Flattened_02.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_War_Storage_Pallet_Wood_Worn_01/SM_Ind_War_Storage_Pallet_Wood_Worn_01.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_Aba_Tarp_Wrinkled_03/SM_Ind_Aba_Tarp_Wrinkled_03.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_War_Storage_Sheet_Cardboard_Flattened_04/SM_Ind_War_Storage_Sheet_Cardboard_Flattened_04.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_Tra_Bag_Plastic_Tied_02/SM_Ind_Tra_Bag_Plastic_Tied_02.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_Aba_Tarp_Wrinkled_01/SM_Ind_Aba_Tarp_Wrinkled_01.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_Tra_Bag_Plastic_Tied_01/SM_Ind_Tra_Bag_Plastic_Tied_01.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Res_Gar_Trash_Paper_Oily_01/SM_Res_Gar_Trash_Paper_Oily_01.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_Rub_Equipment_Pallet_Wood_Piece_01/SM_Ind_Rub_Equipment_Pallet_Wood_Piece_01.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_War_Storage_Sheet_Cardboard_Flattened_01/SM_Ind_War_Storage_Sheet_Cardboard_Flattened_01.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Urb_Str_Bin_Trash_Metal_Worn_03/SM_Urb_Str_Bin_Trash_Metal_Worn_03.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Res_Fur_Table_Wood_Worn_03/SM_Res_Fur_Table_Wood_Worn_03.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_War_Storage_Sheet_Cardboard_Flattened_03/SM_Ind_War_Storage_Sheet_Cardboard_Flattened_03.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_Tra_Bags_Plastic_Pack_01/SM_Ind_Tra_Bags_Plastic_Pack_01_A.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_Tra_Bags_Plastic_Pack_01/SM_Ind_Tra_Bags_Plastic_Pack_01_B.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_Tra_Bags_Plastic_Pack_01/SM_Ind_Tra_Bags_Plastic_Pack_01_C.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Urb_Str_Bin_Trash_Metal_Worn_01/SM_Urb_Str_Bin_Trash_Metal_Worn_01_A.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_War_Storage_Box_Cardboard_Set_01/SM_Ind_War_Storage_Box_Cardboard_Set_01_F.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_War_Storage_Box_Cardboard_Set_01/SM_Ind_War_Storage_Box_Cardboard_Set_01_D.uasset filter=lfs diff=lfs merge=lfs -text
+Content/map_4/Fab/Scene_Trash/Assets/MS/3D/Ind_War_Storage_Box_Cardboard_Set_01/SM_Ind_War_Storage_Box_Cardboard_Set_01_G.uasset filter=lfs diff=lfs merge=lfs -text
