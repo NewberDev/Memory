@@ -61,6 +61,10 @@ bool AItem::TryPickup(AActor* InteractingActor)
 	return true;
 }
 
+void AItem::ResetPickupChance()
+{
+	bPickupCompleted = false;
+}
 
 
 

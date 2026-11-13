@@ -36,6 +36,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Item|Pickup")
 	void OnPickupSucceeded(AActor* InteractingActor);
 
+	UFUNCTION(BlueprintCallable, Category = "Item|Pickup")
+	void ResetPickupChance();
+
 private:
 	UFUNCTION()
 	void HandleInteraction(AActor* InteractingActor);
