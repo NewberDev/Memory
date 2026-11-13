@@ -455,6 +455,8 @@ void UCrimeGameInstanceSubsystem::SetPlayerControlEnabled(bool bEnabled)
 	}
 	else
 	{
+		CancelGamepadInventorySelection();
+
 		PlayerPawn->DisableInput(PlayerController);
 	}
 }
@@ -579,6 +581,8 @@ void UCrimeGameInstanceSubsystem::InspectInventoryItem(int32 ItemIndex)
 
 	if (!IsValid(PlayerController)) return;
 
+	PlayInventoryHintAnimation(ItemIndex);
+
 	switch (Item.UseAction)
 	{
 	case EItemUseAction::ToggleLight:
@@ -606,7 +610,6 @@ void UCrimeGameInstanceSubsystem::InspectInventoryItem(int32 ItemIndex)
 	if (!Item.InspectWidgetClass)
 	{
 		ShowCenterMessageText(Item.Hint);
-		PlayInventoryHintAnimation(ItemIndex);
 		return;
 	}
 
@@ -657,6 +660,70 @@ void UCrimeGameInstanceSubsystem::CloseInventoryItemInspect()
 	PlayerController->FlushPressedKeys();
 	SetPlayerControlEnabled(true);
 }
+
+void UCrimeGameInstanceSubsystem::SetInventorySelectionVisible(bool bVisible)
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!GameInstance || !World) return;
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController)) return;
+
+	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
+
+	if (!IsValid(CrimeHUD)) return;
+
+	CrimeHUD->SetInventorySelectionVisible(bVisible);
+}
+
+void UCrimeGameInstanceSubsystem::SetInventorySelectionIndex(int32 ItemIndex)
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!GameInstance || !World) return;
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController)) return;
+
+	ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>();
+
+	if (!IsValid(CrimeHUD)) return;
+
+	CrimeHUD->SetInventorySelectionIndex(ItemIndex);
+}
+
+void UCrimeGameInstanceSubsystem::CancelGamepadInventorySelection()
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UWorld* World = GetWorld();
+
+	if (!GameInstance || !World) return;
+
+	APlayerController* PlayerController =
+		GameInstance->GetFirstLocalPlayerController(World);
+
+	if (!IsValid(PlayerController)) return;
+
+	if (ACrimeCharacter* PlayerCharacter =
+		Cast<ACrimeCharacter>(PlayerController->GetPawn()))
+	{
+		// 먼저 상태를 내린다. 뒤늦은 R1 릴리스도 아이템을 실행하지 않는다.
+		PlayerCharacter->CancelGamepadInventorySelection();
+	}
+
+	if (ACrimeHUD* CrimeHUD = PlayerController->GetHUD<ACrimeHUD>())
+	{
+		CrimeHUD->CancelInventorySelectionUI();
+	}
+}
+
 
 void UCrimeGameInstanceSubsystem::OpenSettings()
 {

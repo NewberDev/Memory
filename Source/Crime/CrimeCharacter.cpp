@@ -47,6 +47,11 @@ void ACrimeCharacter::BeginPlay()
     bIsLightOn = true;
 
     GetCharacterMovement()->RotationRate.Yaw = WalkRotationRate;
+
+    if (!IsValid(InventoryComponent))
+    {
+        InventoryComponent = FindComponentByClass<UInventoryComponent>();
+    }
 }
 
 void ACrimeCharacter::PossessedBy(AController* NewController)
@@ -204,6 +209,38 @@ void ACrimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
         PlayerInputComponent->KeyBindings.Add(MoveTemp(HintBinding));
     }
 
+    if (ensureMsgf(
+        InventorySelectAction,
+        TEXT("InventorySelectAction is not assigned.")))
+    {
+        // [수정] 누름 → GamepadSelectInventory(true)
+        EnhancedInput->BindAction(
+            InventorySelectAction,
+            ETriggerEvent::Started,
+            this,
+            &ACrimeCharacter::GamepadSelectInventory,
+            true);
+
+        // [수정] 놓음 → GamepadSelectInventory(false)
+        EnhancedInput->BindAction(
+            InventorySelectAction,
+            ETriggerEvent::Completed,
+            this,
+            &ACrimeCharacter::GamepadSelectInventory,
+            false);
+    }
+
+    if (ensureMsgf(
+        InventoryNavigateAction,
+        TEXT("InventoryNavigateAction is not assigned.")))
+    {
+        // [수정] 좌우 → GamepadNavigateInventory
+        EnhancedInput->BindAction(
+            InventoryNavigateAction,
+            ETriggerEvent::Triggered,
+            this,
+            &ACrimeCharacter::GamepadNavigateInventory);
+    }
 }
 
 void ACrimeCharacter::CancelDash()
@@ -216,6 +253,11 @@ void ACrimeCharacter::CancelDash()
 void ACrimeCharacter::CancelBodyLookHoldForUI()
 {
     StopBodyLookHold();
+}
+
+void ACrimeCharacter::CancelGamepadInventorySelection()
+{
+    bIsSelectingInventory = false;
 }
 
 void ACrimeCharacter::Move(const FInputActionValue& Value)
@@ -318,6 +360,7 @@ void ACrimeCharacter::StopLook(const FInputActionValue& Value)
 
 void ACrimeCharacter::Interact()
 {
+    if (bIsSelectingInventory) return;
     if (!bIsLightOn) return;
     if (!IsValid(InteractionSphere)) return;
 
@@ -556,4 +599,78 @@ void ACrimeCharacter::StopBodyLookHold()
 
     FInputModeGameOnly InputMode;
     PlayerController->SetInputMode(InputMode);
+}
+
+void ACrimeCharacter::GamepadSelectInventory(bool bSelecting)
+{
+    UCrimeGameInstanceSubsystem* Subsystem =
+        UCrimeGameInstanceSubsystem::Get(this);
+
+    if (!IsValid(Subsystem)) return;
+
+    if (bSelecting)
+    {
+        // RB 누름
+        if (bIsSelectingInventory) return;
+        if (!IsValid(InventoryComponent)) return;
+        if (InventoryComponent->GetItems().IsEmpty()) return;
+
+
+        bIsSelectingInventory = true;
+        SelectedInventoryIndex = 0;
+
+        // 선택 표시 켜기
+        Subsystem->SetInventorySelectionVisible(true);
+    }
+    else
+    {
+        // RB 놓음
+        if (!bIsSelectingInventory) return;
+
+        bIsSelectingInventory = false;
+
+        // 선택 표시 끄기
+        Subsystem->SetInventorySelectionVisible(false);
+
+        // 선택한 아이템 실행
+        Subsystem->InspectInventoryItem(SelectedInventoryIndex);
+    }
+}
+
+void ACrimeCharacter::GamepadNavigateInventory(const FInputActionValue& Value)
+{
+
+    if (!bIsSelectingInventory) return;
+
+    if (!IsValid(InventoryComponent)) return;
+
+
+    // 실제 소지 아이템 수
+    const int32 ItemCount = InventoryComponent->GetItems().Num();
+
+    if (ItemCount == 0) return;
+
+    const float AxisValue = Value.Get<float>();
+
+    if (FMath::IsNearlyZero(AxisValue)) return;
+
+    // 왼쪽 -1 / 오른쪽 +1
+    const int32 Direction = AxisValue > 0.0f ? 1 : -1;
+
+    // 소지 아이템 범위 안에서만 이동
+    const int32 NewIndex = FMath::Clamp(
+        SelectedInventoryIndex + Direction,
+        0,
+        ItemCount - 1);
+
+    if (NewIndex == SelectedInventoryIndex) return;
+
+    SelectedInventoryIndex = NewIndex;
+
+    if (UCrimeGameInstanceSubsystem* Subsystem =
+        UCrimeGameInstanceSubsystem::Get(this))
+    {
+        // 선택 표시 위치만 변경
+        Subsystem->SetInventorySelectionIndex(SelectedInventoryIndex);
+    }
 }

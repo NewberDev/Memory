@@ -55,6 +55,18 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "HUD")
 	void ShowControls();
 
+	// 게임 패드 선택 UI 표시 / 숨김
+	UFUNCTION(BlueprintImplementableEvent, Category = "HUD|Inventory")
+	void SetInventorySelectionVisible(bool bVisible);
+
+	// 게임 패드 선택 UI를 해당 슬롯으로 이동
+	UFUNCTION(BlueprintImplementableEvent, Category = "HUD|Inventory")
+	void SetInventorySelectionIndex(int32 ItemIndex);
+
+	// 게임 패드 선택 UI를 닫고 선택 표시를 초기화한다.
+	UFUNCTION(BlueprintImplementableEvent, Category = "HUD|Inventory")
+	void CancelInventorySelectionUI();
+
 protected:
 	virtual void BeginPlay() override;
 

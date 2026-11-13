@@ -123,6 +123,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void CloseInventoryItemInspect();
 
+	// 게임 패드 - HUD에 인벤토리 선택 UI 표시 / 숨김 요청
+	UFUNCTION(BlueprintCallable, Category = "HUD|Inventory")
+	void SetInventorySelectionVisible(bool bVisible);
+
+	// 게임 패드 - HUD에 인벤토리 선택 UI 위치 변경 요청
+	UFUNCTION(BlueprintCallable, Category = "HUD|Inventory")
+	void SetInventorySelectionIndex(int32 ItemIndex);
+
+	// 게임패드 -  인벤토리 선택을 실행 없이 취소한다.
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void CancelGamepadInventorySelection();
+
 
 	//사운드 셋팅
 	UFUNCTION(BlueprintPure, Category = "Settings|Audio")
@@ -133,4 +145,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Settings|Audio")
 	void ApplyMasterVolume();
+
+
 };

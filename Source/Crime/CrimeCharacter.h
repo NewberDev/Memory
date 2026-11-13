@@ -53,6 +53,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> BodyLookHoldAction;
 
+	// 인벤토리 선택 시작
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Inventory")
+	TObjectPtr<UInputAction> InventorySelectAction;
+
+	// [추가] 방향 패드 좌우: Axis1D, 왼쪽 -1 / 오른쪽 +1
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Inventory")
+	TObjectPtr<UInputAction> InventoryNavigateAction;
+
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "Look")
 	bool bIsBodyLookHeld = false;
 
@@ -112,6 +120,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Look")
 	void CancelBodyLookHoldForUI();
 
+	void CancelGamepadInventorySelection();
+
 private:
 	void Move(const FInputActionValue& Value);
 
@@ -132,8 +142,15 @@ private:
 
 	void UpdateBodyLookFromMouseCursor();
 
+	// 상체 회전 로직
 	void StartBodyLookHold();
 	void StopBodyLookHold();
+
+	// 게임패드 - R1 누름 / 놓음 처리
+	void GamepadSelectInventory(bool bSelecting);
+
+	// 게임패드 - 방향 패드 좌우 입력 처리
+	void GamepadNavigateInventory(const FInputActionValue& Value);
 
 	UPROPERTY(VisibleAnywhere, Category = "Interaction")
 	TObjectPtr<USphereComponent> InteractionSphere;
@@ -168,4 +185,7 @@ private:
 	bool bIsLightOn = true;
 
 	bool bIsDashing = false;
+
+	bool bIsSelectingInventory = false;
+	int32 SelectedInventoryIndex = 0;
 };
